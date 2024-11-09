@@ -14,7 +14,7 @@ from .utils import beauty_print
 @pytest.fixture
 def xhs_client():
     def sign(uri, data, a1="", web_session=""):
-        res = requests.post("http://localhost:5555/sign",
+        res = requests.post("http://110.42.222.245:5005/sign",
                             json={"uri": uri, "data": data, "a1": a1, "web_session": web_session})
         signs = res.json()
         return {
@@ -52,14 +52,14 @@ def test_external_sign_func():
 
 def test_get_note_by_id(xhs_client: XhsClient):
     # 13 我是DM发布了一篇小红书笔记，快来看吧！ 😆 F02MULzeoQVJ7YY 😆 http://xhslink.com/GQ0MHB，复制本条信息，打开【小红书】App查看精彩内容！
-    note_id = "65682d4500000000380339a5"
+    note_id = "672df05900000000190182b8"
     data = xhs_client.get_note_by_id(note_id)
     beauty_print(data)
     assert data["note_id"] == note_id
 
 
 def test_get_note_by_id_from_html(xhs_client: XhsClient):
-    note_id = "65a025ea000000001d03799b"
+    note_id = "672df05900000000190182b8"
     data = xhs_client.get_note_by_id_from_html(note_id)
     beauty_print(data)
     print(xhs.help.get_imgs_url_from_note(data))
@@ -97,7 +97,7 @@ def test_get_user_by_keyword(xhs_client: XhsClient):
 
 
 def test_get_user_info(xhs_client: XhsClient):
-    user_id = "5ff0e6410000000001008400"
+    user_id = "6057975d0000000001006895"
     data = xhs_client.get_user_info(user_id)
     basic_info = data["basic_info"]
     print(datetime.datetime.now())
@@ -421,7 +421,9 @@ def test_create_video_note(xhs_client: XhsClient):
 
 @pytest.mark.skip()
 def test_create_video_note_with_cover(xhs_client: XhsClient):
-    note = xhs_client.create_video_note(title="123123", video_path="/Users/reajason/Downloads/1.mp4", desc="",
-                                        cover_path="/Users/reajason/Downloads/wall/wallhaven-x6k21l.png",
+    note = xhs_client.create_video_note(title="感谢宜家！🌈这个小东西也太好用了！🐂", video_path="E:\\小红书连怼\\8.mp4", desc="姐妹们👭！！这个小东西一定要冲，有了这个厨房做饭可方便多了，锅台再也不怕被烫了！！😆😆",
+                                        cover_path="E:\\小红书连怼\\封面\\1.jpg",
                                         is_private=True)
     beauty_print(note)
+
+
