@@ -228,15 +228,33 @@ class PublishManager:
                 continue
                 
             current_time = time.time()
-            if task.status.next_publish_time > current_time:
-                time.sleep(min(10, task.status.next_publish_time - current_time))
-                continue
+            
+            # 检查是否需要等待到下次发布时间
+            if task.status.next_publish_time > 0:  # 添加判断，确保有下次发布时间
+                if current_time < task.status.next_publish_time:
+                    # 计算需要等待的时间，但最多等待10秒
+                    wait_time = min(10, task.status.next_publish_time - current_time)
+                    time.sleep(wait_time)
+                    continue
                 
             video = task.get_next_video()
             if not video:
                 break
                 
-            self._publish_single_video(task, video)
+            try:
+                self._publish_single_video(task, video)
+                
+                # 如果是第一次发布，设置下次发布时间
+                if task.status.next_publish_time == 0:
+                    current_time = time.time()
+                    float_seconds = random.randint(1, task.float_minutes * 60)
+                    next_delay = task.interval_minutes * 60 + float_seconds
+                    task.status.next_publish_time = current_time + next_delay
+                    task._save_status()
+                    
+            except Exception as e:
+                logging.error(f"发布失败: {task.cookie}, 视频: {video['title']}, 错误: {str(e)}")
+                time.sleep(60)  # 发布失败后等待1分钟
 
     def _publish_single_video(self, task: PublishTask, video: Dict):
         """发布单个视频"""

@@ -9,7 +9,7 @@ from typing import NamedTuple
 import requests
 from lxml import etree
 
-from xhs.exception import (DataFetchError, ErrorEnum, IPBlockError,
+from .exception import (DataFetchError, ErrorEnum, IPBlockError,
                            NeedVerifyError, SignError)
 
 from .help import (cookie_jar_to_cookie_str, download_file,
@@ -101,7 +101,6 @@ class XhsClient:
         self.external_sign = sign
         self._host = "https://edith.xiaohongshu.com"
         self._creator_host = "https://creator.xiaohongshu.com"
-        self._customer_host = "https://customer.xiaohongshu.com"
         self.home = "https://www.xiaohongshu.com"
         self.user_agent = user_agent or (
             "Mozilla/5.0 "
@@ -132,8 +131,8 @@ class XhsClient:
     def session(self):
         return self.__session
 
-    def _pre_headers(self, url: str, data=None, quick_sign: bool = False):
-        if quick_sign:
+    def _pre_headers(self, url: str, data=None, is_creator: bool = False):
+        if is_creator:
             signs = sign(url, data, a1=self.cookie_dict.get("a1"))
             self.__session.headers.update({"x-s": signs["x-s"]})
             self.__session.headers.update({"x-t": signs["x-t"]})
@@ -158,6 +157,7 @@ class XhsClient:
             data = response.json()
         except json.decoder.JSONDecodeError:
             return response
+        print(data)
         if response.status_code == 471 or response.status_code == 461:
             # someday someone maybe will bypass captcha
             verify_type = response.headers['Verifytype']
@@ -174,34 +174,21 @@ class XhsClient:
         else:
             raise DataFetchError(data, response=response)
 
-    def get(self, uri: str, params=None, is_creator: bool = False, is_customer: bool = False, **kwargs):
+    def get(self, uri: str, params=None, is_creator: bool = False, **kwargs):
         final_uri = uri
         if isinstance(params, dict):
             final_uri = f"{uri}?" f"{'&'.join([f'{k}={v}' for k, v in params.items()])}"
-        self._pre_headers(final_uri, quick_sign=is_creator or is_customer)
-        endpoint = self._host
-        if is_customer:
-            endpoint = self._customer_host
-        elif is_creator:
-            endpoint = self._creator_host
-        return self.request(method="GET", url=f"{endpoint}{final_uri}",
+        self._pre_headers(final_uri, is_creator=is_creator)
+        return self.request(method="GET", url=f"{self._creator_host if is_creator else self._host}{final_uri}",
                             **kwargs)
 
-    def post(self, uri: str, data: dict | None, is_creator: bool = False, is_customer: bool = False, **kwargs):
+    def post(self, uri: str, data: dict, is_creator: bool = False, **kwargs):
+        self._pre_headers(uri, data, is_creator=is_creator)
         json_str = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
-        self._pre_headers(uri, data, quick_sign=is_creator or is_customer)
-        endpoint = self._host
-        if is_customer:
-            endpoint = self._customer_host
-        elif is_creator:
-            endpoint = self._creator_host
-        if data:
-            return self.request(
-                method="POST", url=f"{endpoint}{uri}", data=json_str.encode(),
-                **kwargs
-            )
-        else:
-            return self.request(method="POST", url=f"{endpoint}{uri}", **kwargs)
+        return self.request(
+            method="POST", url=f"{self._creator_host if is_creator else self._host}{uri}", data=json_str.encode(),
+            **kwargs
+        )
 
     def get_note_by_id(self, note_id: str):
         """
@@ -335,13 +322,6 @@ class XhsClient:
     def get_self_info2(self):
         uri = "/api/sns/web/v2/user/me"
         return self.get(uri)
-
-    def get_self_info_from_creator(self):
-        uri = "/api/galaxy/creator/home/personal_info"
-        headers = {
-            "referer": "https://creator.xiaohongshu.com/creator/home"
-        }
-        return self.get(uri, is_creator=True, headers=headers)
 
     def get_user_by_keyword(self, keyword: str,
                             page: int = 1,
@@ -505,7 +485,7 @@ class XhsClient:
         :rtype: dict
         """
         uri = "/api/sns/web/v2/comment/page"
-        params = {"note_id": note_id, "cursor": cursor, "image_formats": "jpg,webp,avif"}
+        params = {"note_id": note_id, "cursor": cursor}
         return self.get(uri, params)
 
     def get_note_sub_comments(
@@ -673,36 +653,6 @@ class XhsClient:
         data = {"mobile_token": mobile_token, "zone": zone, "phone": phone}
         return self.post(uri, data)
 
-    def get_qrcode_from_creator(self):
-        uri = "/api/cas/customer/web/qr-code"
-        data = {"service": "https://creator.xiaohongshu.com"}
-        return self.post(uri, data, is_customer=True)
-
-    def check_qrcode_from_creator(self, qr_code_id: str):
-        uri = "/api/cas/customer/web/qr-code"
-        params = {
-            "service": "https://creator.xiaohongshu.com",
-            "qr_code_id": qr_code_id,
-        }
-        return self.get(uri, params, is_customer=True)
-
-    def customer_login(self, ticket: str):
-        uri = "/sso/customer_login"
-        data = {
-            "ticket": ticket,
-            "login_service": "https://creator.xiaohongshu.com",
-            "subsystem_alias": "creator",
-            "set_global_domain": True
-        }
-        return self.post(uri, data, is_creator=True)
-
-    def login_from_creator(self):
-        uri = "/api/galaxy/user/cas/login"
-        headers = {
-            "referer": "https://creator.xiaohongshu.com/login"
-        }
-        return self.post(uri, None, is_creator=True, headers=headers)
-
     def get_user_collect_notes(self, user_id: str, num: int = 30, cursor: str = ""):
         uri = "/api/sns/web/v2/note/collect/page"
         params = {"user_id": user_id, "num": num, "cursor": cursor}
@@ -738,14 +688,6 @@ class XhsClient:
             "Referer": "https://creator.xiaohongshu.com/creator/notes?source=official"
         }
         return self.get(uri, headers=headers, is_creator=True)
-
-    def get_creator_note_list(self, tab: int = 0, page: int = 0):
-        uri = "/api/galaxy/creator/note/user/posted"
-        params = {"tab": tab, "page": page}
-        headers = {
-            "Referer": "https://creator.xiaohongshu.com/new/note-manager"
-        }
-        return self.get(uri, params, headers=headers, is_creator=True)
 
     def get_notes_statistics(self, page: int = 1, page_size: int = 48, sort_by="time", note_type=0, time=30,
                              is_recent=True):
@@ -865,8 +807,8 @@ class XhsClient:
         max_file_size = 5 * 1024 * 1024
         url = "https://ros-upload.xiaohongshu.com/" + file_id
         if os.path.getsize(file_path) > max_file_size and content_type == "video/mp4":
-            raise Exception("video too large, < 5M")
-            # return self.upload_file_with_slice(file_id, token, file_path)
+            # raise Exception("video too large, < 5M")
+            return self.upload_file_with_slice(file_id, token, file_path)
         else:
             headers = {"X-Cos-Security-Token": token, "Content-Type": content_type}
             with open(file_path, "rb") as f:
@@ -903,7 +845,7 @@ class XhsClient:
     def create_note(self, title, desc, note_type, ats: list = None, topics: list = None,
                     image_info: dict = None,
                     video_info: dict = None,
-                    post_time: str = None, is_private: bool = False):
+                    post_time: str = None, is_private: bool = False,biz_relations: list = None):
         if post_time:
             post_date_time = datetime.strptime(post_time, "%Y-%m-%d %H:%M:%S")
             post_time = round(int(post_date_time.timestamp()) * 1000)
@@ -912,7 +854,7 @@ class XhsClient:
             "version": 1,
             "noteId": 0,
             "noteOrderBind": {},
-            "notePostTiming": {
+            "notePostTiming": { 
                 "postTime": post_time
             },
             "noteCollectionBind": {
@@ -932,6 +874,7 @@ class XhsClient:
                 "hash_tag": topics,
                 "post_loc": {},
                 "privacy_info": {"op_type": 1, "type": int(is_private)},
+                "biz_relations": biz_relations,
             },
             "image_info": image_info,
             "video_info": video_info,
@@ -939,6 +882,7 @@ class XhsClient:
         headers = {
             "Referer": "https://creator.xiaohongshu.com/"
         }
+        print(data)
         return self.post(uri, data, headers=headers)
 
     def create_image_note(
@@ -1010,6 +954,8 @@ class XhsClient:
             video_path: str,
             desc: str,
             cover_path: str = None,
+            goodId: str = None,
+            goodName: str = None,
             ats: list = None,
             post_time: str = None,
             topics: list = None,
@@ -1022,6 +968,8 @@ class XhsClient:
         :param video_path: 视频文件路径，目前只支持本地路径
         :param desc: 笔记详情
         :param cover_path: 可选，封面文件路径
+        :param goodId: 可选，商品ID
+        :param goodName: 可选，商品名称
         :param ats: 可选，@用户信息
         :param post_time: 可选，发布时间
         :param topics: 可选，话题信息
@@ -1070,5 +1018,24 @@ class XhsClient:
             "chapter_sync_text": False,
             "entrance": "web",
         }
+        biz_relations = None
+        # 处理商品关联
+        if goodId:
+            # 如果传入的是字符串（商品ID），转换为标准格式
+            biz_relations = [{
+                "biz_type": "GOODS_SELLER_V2",
+                "biz_id": goodId,
+                "extra_info": json.dumps({
+                    "goods_id": goodId,
+                    # "goods_name": goodName,
+                    "goods_type": "goods_seller",
+                    "tab_id": 1,
+                    "image_type": "spec",
+                    "left_bottom_type": "BUY_GOODS",
+                    "bind_order": 0,
+                })
+            }]
+        
         return self.create_note(title, desc, NoteType.VIDEO.value, ats=ats, topics=topics, video_info=video_info,
-                                post_time=post_time, is_private=is_private)
+                                post_time=post_time, is_private=is_private,biz_relations=biz_relations)
+
