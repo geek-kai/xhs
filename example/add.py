@@ -24,7 +24,7 @@ def test_proxy():
 def sign(uri, data=None, a1="", web_session=""):
     try:
         # 填写自己的 flask 签名服务端口地址
-        res = requests.post("http://localhost:5005/sign",
+        res = requests.post("http://110.42.222.245:5005/sign",
                           json={"uri": uri, "data": data, "a1": a1, "web_session": web_session},
                           verify=False)
         
@@ -94,9 +94,11 @@ def add(
         media_path = video_path
         # 如果提供了封面，使用提供的封面
     if cover_path:
-       cover = cover_path
+        cover = cover_path
+    else:
+        cover = None  # 确保 cover 变量在 cover_path 为空时有默认值
 
-    print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover}, goodId={good_id}, goodName={good_name}")
+    # print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover}, goodId={good_id}, goodName={good_name}")
 
     try:
         client.create_video_note(
