@@ -24,7 +24,7 @@ def test_proxy():
 def sign(uri, data=None, a1="", web_session=""):
     try:
         # 填写自己的 flask 签名服务端口地址
-        res = requests.post("http://localhost:5005/sign",
+        res = requests.post("http://110.42.222.245:5005/sign",
                           json={"uri": uri, "data": data, "a1": a1, "web_session": web_session},
                           verify=False)
         
