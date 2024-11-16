@@ -85,9 +85,9 @@ def add(
     client = XhsClient(cookie=cookie, proxies=proxies,sign=sign,timeout=120)
     
     # 处理话题
-    if topics:
-        formatted_topics = [f"#{topic}" for topic in topics]
-        content = content + " " + " ".join(formatted_topics)
+    # if topics:
+    #     formatted_topics = [f"#{topic}" for topic in topics]
+    #     content = content + " " + " ".join(formatted_topics)
     
     # 根据是否有视频来决定发布类型
     if video_path:

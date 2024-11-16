@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 from typing import List, Tuple
 import sys
+import traceback
 
 # 添加项目根目录到 Python 路径
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -15,14 +16,15 @@ class AutoPoster:
     def __init__(
         self,
         video_folder: str,
-        cover_folder: str,
         cookie: str,
         title: str,
         content: str,
+        threshold: int,
+        cover_folder: str = None,
         good_id=None,
         good_name=None,
         topics=None,
-        proxies=None
+        proxies =None
     ):
         self.video_folder = video_folder
         self.cover_folder = cover_folder
@@ -33,6 +35,7 @@ class AutoPoster:
         self.good_name = good_name
         self.topics = topics
         self.proxies = proxies
+        self.threshold = threshold
         
         # 初始化日志
         logging.basicConfig(
@@ -68,27 +71,35 @@ class AutoPoster:
 
     def _get_next_files(self) -> Tuple[str, str]:
         """获取下一个要发布的视频和封面文件"""
-        if not self.video_files or not self.cover_files:
-            raise ValueError("视频或封面文件夹为空！")
+        if not self.video_files:
+            raise ValueError("视频文件夹为空！")
 
         video = self.video_files[self.current_video_index]
-        cover = self.cover_files[self.current_cover_index]
+
+        # 检查封面文件列表是否为空
+        cover = None  # 默认值为 None
+        if self.cover_files:  # 只有在封面文件列表不为空时才访问
+            cover = self.cover_files[self.current_cover_index]
+            self.current_cover_index = (self.current_cover_index + 1) % len(self.cover_files)
 
         # 更新索引
         self.current_video_index = (self.current_video_index + 1) % len(self.video_files)
-        self.current_cover_index = (self.current_cover_index + 1) % len(self.cover_files)
 
         return video, cover
 
     def start_posting(self):
         """开始自动发布流程"""
-        while True:
+        post_count = 0
+        while post_count < self.threshold:
             try:
                 video_path, cover_path = self._get_next_files()
                 
                 # 发布笔记
                 logging.info(f"正在发布视频: {video_path}")
-                logging.info(f"使用封面: {cover_path}")
+                logging.info(f"使用封面: {cover_path if cover_path else '无封面'}")
+                
+                # 确保 cover_path 有值
+                cover = cover_path if cover_path else None
                 
                 add(
                     good_id=self.good_id,
@@ -98,11 +109,12 @@ class AutoPoster:
                     title=self.title,
                     content=self.content,
                     topics=self.topics,
-                    cover_path=cover_path,
+                    cover_path=cover,  # 确保 cover 变量被传递
                     video_path=video_path
                 )
                 
                 logging.info("发布成功！")
+                post_count += 1
                 
                 # 随机等待时间：30分钟 + (0-10分钟的随机值)
                 wait_time = 1800 + random.randint(0, 600)
@@ -113,20 +125,45 @@ class AutoPoster:
                 
             except Exception as e:
                 logging.error(f"发布失败: {str(e)}")
+                traceback.print_exc()
                 time.sleep(300)  # 发生错误等待5分钟后继续
 
 if __name__ == "__main__":
-    # 使用示例
+    # 引导用户输入参数
+    video_folder = input("请输入视频文件夹路径: ")
+    cover_folder = input("请输入封面文件夹路径（可选，直接按回车跳过）: ") or None
+    cookie = input("请输入cookie: ")
+    title = input("请输入标题: ")
+    content = input("请输入内容: ")
+    threshold = int(input("请输入发布阈值: "))
+    proxies= str(input("请输入proxies: （可选，直接按回车跳过）:  "))
+    topics=str(input("请输入话题: （可选，直接按回车跳过）:  "))
+    goodId=str(input("请输入商品id: （可选，直接按回车跳过）:  "))
+
+    # 创建 AutoPoster 实例
     poster = AutoPoster(
-        video_folder="E:\\小红书连怼\\夹子\\视频",
-        cover_folder="E:\\小红书连怼\\夹子\\封面",
-        cookie="a1=1930c3208c2st1lsvuv2vd79o36rlvlr891bx0fyf50000418831; webId=8edebd39d092a116b1ee22a59ada1647; gid=yjq8SqJySyY0yjq8SqJ8Yj8iSJM9y1Mh7hJhyvifWjlqKD28F1h1FC8884yYYqy8iWYW4DDK; x-user-id-creator.xiaohongshu.com=6472c13d0000000010034a47; customerClientId=736660462325024; access-token-creator.xiaohongshu.com=customer.creator.AT-68c5174349219452291637559ybuwz9w9kosyiop; galaxy_creator_session_id=9zLJ04tDKmDS1YWUlt0sT68p6fvEATGc1Syq; galaxy.creator.beaker.session.id=1731077662909005479993; access-token-ark.beta.xiaohongshu.com=; customer-sso-sid=68c5174356602028522753461f5ea207a2b6a303; x-user-id-ark.xiaohongshu.com=5f6c75da000000000100502a; access-token-ark.xiaohongshu.com=customer.ark.AT-68c5174356602114422099524mqinwrt7mjlbaif; beaker.session.id=15b5da170c5aead0cd4eb23a24b8b343bbafe50egAJ9cQEoWA4AAAByYS11c2VyLWlkLWFya3ECWBgAAAA2NWVjNjZkNWUzMDAwMDAwMDAwMDAwMDFxA1UIX2V4cGlyZXNxBGNkYXRldGltZQpkYXRldGltZQpxBVUKB+gLDQAQEASnxYVScQZYCwAAAGFyay1saWFzLWlkcQdYGAAAADY1ZWM2ODExYmY3ZmI2MDAwMWZjYzkyZnEIWA4AAABfYWNjZXNzZWRfdGltZXEJR0HZzLSJrzddVQNfaWRxClggAAAAZGVhNWIzZDg5ZTZkNGJmZTlkNDQ1MmRlNjg2MzYzOGNxC1gRAAAAcmEtYXV0aC10b2tlbi1hcmtxDFhBAAAAMjFlZTIxN2M3ZDllNDFhNTk1MmNhNDI4Zjg4MGQzMzEtYzk3Mzg4MzRmNmFkNDBiYzk3NjJmYTI5YTE1YjY0OGFxDVgOAAAAX2NyZWF0aW9uX3RpbWVxDkdB2ciLFdLQ5XUu; webBuild=4.42.2; xsecappid=xhs-pc-web; acw_tc=556206320c4b439a097a8eb65289f64745f551f2bb72733ae53f25b87ea20886; websectiga=cffd9dcea65962b05ab048ac76962acee933d26157113bb213105a116241fa6c; sec_poison_id=735f8801-ca22-43a7-8478-e5d37f68f0d5; web_session=040069b5068275111a11407006354b83b4a1c3; unread={%22ub%22:%22672746cf000000001a01fc41%22%2C%22ue%22:%226731db9d000000001b0102d6%22%2C%22uc%22:26}",
-        title="感谢宜家，打开收纳新思路！！",
-        content="感谢宜家，打开收纳新思路！！",
-        good_id="672cc6436a6c1800019115ff",
-        proxies={
-            "http": "socks5://ptI31320x3:blnstIJ2@101.89.108.232:8864",
-            "https": "socks5://ptI31320x3:blnstIJ2@101.89.108.232:8864"
-        },
+        video_folder=video_folder,
+        cover_folder=cover_folder,
+        cookie=cookie,
+        topics=topics,
+        title=title,
+        content=content,
+        threshold=threshold,
+        proxies= proxies,
+        good_id=goodId,
     )
+    #  # 创建 AutoPoster 实例
+    # poster = AutoPoster(
+    #     video_folder="D:\小红书\酸枣仁\视频",
+    #     cover_folder="D:\小红书\酸枣仁\封面",
+    #     cookie="a1=18f04f026c73hvt0qbnsxsexoyxv1aeoiranzb4qp00000182341; webId=2b6b30997506d15bd44b819bc2eadd02; gid=yYi84i82DK32yYi84i8JKFD4SWqxh98ADIMC0AUMdClvCI88hy0dlu888yYJq4y8DYq8Wiq2; customerClientId=616579123539810; timestamp2=17149807288790a3c5b7db37505101975fd3d2e564e3368345efd7b7a2b8450; timestamp2.sig=HgAIE6q7IQZXGeN5ut5i_sqyHhbmu5JvGGgavFgRAVs; x-user-id-redlive.xiaohongshu.com=663b87510000000003031657; customer-sso-sid=68c51739000404764324813072b71ba8d6351cba; x-user-id-ark.xiaohongshu.com=5f6c75da000000000100502a; abRequestId=2b6b30997506d15bd44b819bc2eadd02; webBuild=4.43.0; xsecappid=xhs-pc-web; acw_tc=3f16768d123ed0d2176001127b9fddb6660d5689a9aef4b0f2766a740b632d98; websectiga=634d3ad75ffb42a2ade2c5e1705a73c845837578aeb31ba0e442d75c648da36a; sec_poison_id=1d640f81-2120-488d-94eb-6a0a69824091; web_session=040069b6404ca42493dd1b3300354b096f00cc; unread={%22ub%22:%2267347048000000001901a740%22%2C%22ue%22:%2267162fa10000000024019cce%22%2C%22uc%22:29}",
+    #     title="这个小妙招很有用",
+    #     content="这个小妙招很有用",
+    #     threshold=3,
+    #     proxies= {
+    #         "http": "socks5://uEU17768qt:mzFGHKLV@121.224.7.202:8864",
+    #         # "https": "socks5://uEU17768qt:mzFGHKLV@121.224.7.202:8864"
+    #     }
+    # )
+    # logging.info(poster)
     poster.start_posting() 
