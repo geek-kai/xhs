@@ -55,6 +55,7 @@ def add(
     title,   # 保持为必填参数
 
     content,  
+    post_time=None,
     good_id=None, 
 
     good_name=None, 
@@ -98,7 +99,7 @@ def add(
     else:
         cover = None  # 确保 cover 变量在 cover_path 为空时有默认值
 
-    # print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover}, goodId={good_id}, goodName={good_name}")
+    # print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover}, if({post_time}):post_time={post_time}")
 
     try:
         client.create_video_note(
@@ -107,7 +108,7 @@ def add(
             desc=content,
             cover_path=cover,
             goodId=good_id,
-            goodName=good_name
+            post_time=post_time
         )
     except Exception as e:
         print(f"发布笔记时发生错误: {str(e)}")
