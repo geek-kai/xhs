@@ -55,6 +55,7 @@ def add(
     title,   # 保持为必填参数
 
     content,  
+    post_time=None,
     good_id=None, 
 
     good_name=None, 
@@ -85,18 +86,20 @@ def add(
     client = XhsClient(cookie=cookie, proxies=proxies,sign=sign,timeout=120)
     
     # 处理话题
-    # if topics:
-    #     formatted_topics = [f"#{topic}" for topic in topics]
-    #     content = content + " " + " ".join(formatted_topics)
+    if topics:
+        formatted_topics = [f"#{topic}" for topic in topics]
+        content = content + " " + " ".join(formatted_topics)
     
     # 根据是否有视频来决定发布类型
     if video_path:
         media_path = video_path
         # 如果提供了封面，使用提供的封面
     if cover_path:
-       cover = cover_path
+        cover = cover_path
+    else:
+        cover = None  # 确保 cover 变量在 cover_path 为空时有默认值
 
-    print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover}, goodId={good_id}, goodName={good_name}")
+    # print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover}, if({post_time}):post_time={post_time}")
 
     try:
         client.create_video_note(
@@ -105,7 +108,7 @@ def add(
             desc=content,
             cover_path=cover,
             goodId=good_id,
-            goodName=good_name
+            post_time=post_time
         )
     except Exception as e:
         print(f"发布笔记时发生错误: {str(e)}")

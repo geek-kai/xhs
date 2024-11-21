@@ -16,6 +16,7 @@ from .help import (cookie_jar_to_cookie_str, download_file,
                    get_imgs_url_from_note, get_search_id, get_valid_path_name,
                    get_video_url_from_note, parse_xml, sign,
                    update_session_cookies_from_cookie)
+import logging
 
 
 class FeedType(Enum):
@@ -157,7 +158,6 @@ class XhsClient:
             data = response.json()
         except json.decoder.JSONDecodeError:
             return response
-        print(data)
         if response.status_code == 471 or response.status_code == 461:
             # someday someone maybe will bypass captcha
             verify_type = response.headers['Verifytype']
@@ -755,10 +755,7 @@ class XhsClient:
         xml_string = ("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" + etree.tostring(root,
                                                                                                        encoding='UTF-8').decode(
             "UTF-8").replace("&amp;", "&"))
-        print(xml_string)
-        print(file_id)
-        print(token)
-        print(upload_id)
+     
         headers = {"X-Cos-Security-Token": token, "Content-Type": "application/xml"}
         url = f"https://ros-upload.xiaohongshu.com/{file_id}?uploadId={upload_id}"
         return self.request("POST", url, data=xml_string, headers=headers)
@@ -846,9 +843,11 @@ class XhsClient:
                     image_info: dict = None,
                     video_info: dict = None,
                     post_time: str = None, is_private: bool = False,biz_relations: list = None):
+
         if post_time:
             post_date_time = datetime.strptime(post_time, "%Y-%m-%d %H:%M:%S")
             post_time = round(int(post_date_time.timestamp()) * 1000)
+
         uri = "/web_api/sns/v2/note"
         business_binds = {
             "version": 1,
@@ -882,7 +881,7 @@ class XhsClient:
         headers = {
             "Referer": "https://creator.xiaohongshu.com/"
         }
-        print(data)
+        logging.info(f"开始发布 发布参数: {data}")
         return self.post(uri, data, headers=headers)
 
     def create_image_note(
@@ -955,7 +954,6 @@ class XhsClient:
             desc: str,
             cover_path: str = None,
             goodId: str = None,
-            goodName: str = None,
             ats: list = None,
             post_time: str = None,
             topics: list = None,
