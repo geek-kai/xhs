@@ -99,7 +99,7 @@ def add(
     else:
         cover = None  # 确保 cover 变量在 cover_path 为空时有默认值
 
-    # print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover}, if({post_time}):post_time={post_time}")
+    print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover},cookie={cookie},proxies={proxies}")
 
     try:
         client.create_video_note(
@@ -113,6 +113,7 @@ def add(
     except Exception as e:
         print(f"发布笔记时发生错误: {str(e)}")
         traceback.print_exc()  # 输出完整的错误堆栈跟踪 
+        raise  # 抛出异常以便上层捕获
 
 if __name__=="__main__":
 
