@@ -1,14 +1,40 @@
 [
     {
-        "username": "312",
-        "cookie": "a1=18eeefaa122whz4j546jj6r9imv2uf7518sf1jj2e00000344965; webId=0a9479d8946333e6e92a5e9062c0698e; gid=yYdddi0DqiyjyYdddi00yYVVJJExu4V24KVVMJdKFj36hi88J7iW2y888q44jK28JjfDj4qi; x-user-id-ark.xiaohongshu.com=649c5237000000000a022752; customerClientId=310451762339325; abRequestId=0a9479d8946333e6e92a5e9062c0698e; timestamp2=1713445808960d20d2677b11125fc163f72113007bcf2b9143ce4f8776bdb6f; timestamp2.sig=vvSxY0BrHQkKRBeQv1cgjONqVFm6Zwd3cwbqV7nZp8M; x-user-id-redlive.xiaohongshu.com=663251250000000007005be0; customer-sso-sid=68c517438070680348742144164c446d9d18b6da; x-user-id-creator.xiaohongshu.com=66f668db000000001d031d32; access-token-creator.xiaohongshu.com=customer.creator.AT-68c5174380706803487421464vaqe6h5esemi2dw; galaxy_creator_session_id=ymULBdwrQMMHLrn296RD1izxtqAHRpZJcCK1; galaxy.creator.beaker.session.id=1731810784372063176905; web_session=040069b7822b93254d64da150c354b3a4daa7b; webBuild=4.44.0; xsecappid=xhs-pc-web; websectiga=cffd9dcea65962b05ab048ac76962acee933d26157113bb213105a116241fa6c; sec_poison_id=6d7d84e6-4c68-411d-a2e6-24e6a3c361c6; acw_tc=0a4aba3017321947528423801e933892c1fccd6393f5c66266d1e4615c3269\n",
-        "proxy": "",
-        "video_folder": "D:/小红书/白发/每日一笑/视频",
-        "title": "这个小妙招很有用！！\n",
-        "content": "这个小妙招很有用！！\n",
+        "username": "测试1",
+        "cookie": "测试14cookie",
+        "proxy": "测试1代理",
+        "video_folder": "E:/小红书连怼/黑头水/视频",
+        "title": "测试1标题1",
+        "content": "测试1封面1",
         "threshold": 2,
-        "wait_time": 3678,
-        "cover_folder": "D:/小红书/白发/每日一笑/封面",
-        "first_post_immediate": "n"
+        "wait_time": 3666,
+        "cover_folder": "E:/小红书连怼/黑头水/封面",
+        "first_post_immediate": "n",
+        "published": true
+    },
+    {
+        "username": "测试2",
+        "cookie": "测试2cookie",
+        "proxy": "测试2代理",
+        "video_folder": "E:/小红书连怼/夹子/视频",
+        "title": "测试2标题3",
+        "content": "测试2封面33",
+        "threshold": 10,
+        "wait_time": 3600,
+        "cover_folder": "E:/小红书连怼/夹子/封面",
+        "first_post_immediate": "y"
+    },
+    {
+        "username": "测试4",
+        "cookie": "测试4cookie",
+        "proxy": "测试4代理",
+        "video_folder": "E:/小红书连怼/测试4/视频",
+        "title": "测试4标题",
+        "content": "测试4封面",
+        "threshold": 10,
+        "wait_time": 3600,
+        "cover_folder": "E:/小红书连怼/测试4/封面",
+        "published": true,
+        "first_post_immediate": "y"
     }
 ]

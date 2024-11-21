@@ -16,7 +16,7 @@ from add import add  # 使用绝对导入
 class AutoPoster:
     def __init__(self, video_folder: str, cookie: str, title: str, content: str, threshold: int,
                  cover_folder: str = None, good_id=None, good_name=None, topics=None, proxies=None,
-                 wait_time: int = 1800, log_output=None,first_post_immediate=False,mode=2):
+                 wait_time: int = 1800, log_output=None, first_post_immediate=False, mode=2, log_account_activity=None, log_user=None):
         self.video_folder = video_folder
         self.cover_folder = cover_folder
         self.cookie = cookie
@@ -29,9 +29,11 @@ class AutoPoster:
         self.threshold = threshold
         self.wait_time = wait_time
         self.log_output = log_output  # 用于记录日志的文本框
-        self.first_post_immediate=first_post_immediate
-        self.wait_time=wait_time
-        self.mode=mode
+        self.first_post_immediate = first_post_immediate
+        self.mode = mode
+        self.log_account_activity = log_account_activity  # 记录账号活动日志的函数
+        self.log_user = log_user  # 记录用户名
+
         # 初始化日志
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -39,15 +41,11 @@ class AutoPoster:
         self.video_files = self._get_files(video_folder, ['.mp4', '.MP4'])
         self.cover_files = self._get_files(cover_folder, ['.jpg', '.JPG', '.png', '.PNG'])
 
-        # 添加调试信息
-        logging.info(f"找到的视频文件: {self.video_files}")
-        logging.info(f"找到的封面文件: {self.cover_files}")
-
         # 检查是否为空
         if not self.video_files:
-            logging.warning("视频文件夹为空！")
+            self.log_message("视频文件夹为空！")
         if not self.cover_files:
-            logging.warning("封面文件夹为空！")
+            self.log_message("封面文件夹为空！")
 
         # 当前索引
         self.current_video_index = 0
@@ -80,11 +78,15 @@ class AutoPoster:
         return video, cover
 
     def log_message(self, message: str):
-        """在日志输出框中显示信息"""
+        """在日志输出框中显示信息并记录到账号日志"""
         logging.info(message)
         if self.log_output:
             self.log_output.insert(tk.END, message + "\n")
             self.log_output.see(tk.END)  # 滚动到文本框的底部
+
+        # 记录到账号日志
+        if self.log_account_activity:
+            self.log_account_activity(self.log_user, message)  # 使用传递的用户名
 
     def start_posting(self):
         """开始自动发布流程"""
@@ -120,7 +122,6 @@ class AutoPoster:
                             post_count += 1
                             break  # 成功后退出重试循环
                         except Exception as e:
-
                             if "签名服务器返回错误状态码" in str(e):
                                 retries += 1
                                 self.log_message(f"发布笔记时发生错误: {str(e)}，正在重试... (尝试次数: {retries})")
@@ -172,8 +173,17 @@ class AutoPoster:
                     retries = 0
                     while retries < 3:
                         try:
-                          
-                         
+                            self.log_message(f"发布笔记参数: title={self.title}, "
+                                            f"good_id={self.good_id}, "
+                                            f"cookie={self.cookie}, "
+                                            f"proxies={self.proxies}, "
+                                            f"title={self.title}, "
+                                            f"content={self.content}, "
+                                            f"topics={self.topics}, "
+                                            f"cover_path={cover_path}, "
+                                            f"video_path={video_path}, "
+                                            f"post_time={post_time.strftime('%Y-%m-%d %H:%M:%S') if post_time else None}")
+
                             add(
                                 good_id=self.good_id,
                                 good_name=self.good_name,
@@ -231,7 +241,8 @@ def start_auto_posting():
             wait_time=wait_time,  # 传入用户的等待时间
             log_output=log_output,
             first_post_immediate=first_post_immediate,
-            mode=mode # 传递日志输出框
+            mode=mode,  # 传递发布模式
+          # 传递记录账号活动日志的函数
         )
         
         # 使用线程来启动发布
