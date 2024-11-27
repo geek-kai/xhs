@@ -4,6 +4,7 @@ import sys
 import os
 import requests
 import traceback
+import re
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -24,19 +25,20 @@ def test_proxy():
 def sign(uri, data=None, a1="", web_session=""):
     try:
         # 填写自己的 flask 签名服务端口地址
-        res = requests.post("http://110.42.222.245:5005/sign",
+        res = requests.post("http://127.0.0.1:5005/sign",
                           json={"uri": uri, "data": data, "a1": a1, "web_session": web_session},
                           verify=False)
         
-        # 打印响应内容和状态码，用于调试
-        print(f"签名服务器状态码: {res.status_code}")
-        print(f"签名服务器响应内容: {res.text}")
-        
+       
         # 检查响应状态码
         if res.status_code != 200:
             raise Exception(f"签名服务器返回错误状态码: {res.status_code}")
             
         signs = res.json()
+         # 打印响应内容和状态码，用于调试
+        print(f"签名服务器状态码: {res.status_code}")
+        print(f"签名服务器响应内容: {res.text}")
+        
         return {
             "x-s": signs["x-s"],
             "x-t": signs["x-t"]
@@ -83,7 +85,25 @@ def add(
     :param video_path: 视频路径，与 image_list 二选一
     :return: 
     """
-    # client = XhsClient(cookie=cookie, proxies=proxies,sign=sign,timeout=120)
+    # 获取新的 a1 值
+    try:
+        a1_response = requests.get("http://127.0.0.1:5005/a1")
+        a1_data = a1_response.json()
+        new_a1 = a1_data.get("a1", "")
+    except Exception as e:
+        print(f"获取 a1 时发生错误: {str(e)}")
+        raise
+
+    # 更新 cookie 中的 a1 值
+    if "a1=" in cookie:
+        # 替换现有的 a1 值
+        cookie = re.sub(r'a1=[^;]*', f'a1={new_a1}', cookie)
+
+    else:
+        # 添加新的 a1 值
+        cookie += f"; a1={new_a1}"
+
+    client = XhsClient(cookie=cookie, proxies=proxies, sign=sign, timeout=60)
     
     # 处理话题
     if topics:
@@ -99,21 +119,21 @@ def add(
     else:
         cover = None  # 确保 cover 变量在 cover_path 为空时有默认值
 
-    print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover},cookie={cookie},proxies={proxies}")
+    # print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover},cookie={cookie},proxies={proxies}")
 
-    # try:
-    #     client.create_video_note(
-    #         title=title,
-    #         video_path=media_path,
-    #         desc=content,
-    #         cover_path=cover,
-    #         goodId=good_id,
-    #         post_time=post_time
-    #     )
-    # except Exception as e:
-    #     print(f"发布笔记时发生错误: {str(e)}")
-    #     traceback.print_exc()  # 输出完整的错误堆栈跟踪 
-    #     raise  # 抛出异常以便上层捕获
+    try:
+        client.create_video_note(
+            title=title,
+            video_path=media_path,
+            desc=content,
+            cover_path=cover,
+            goodId=good_id,
+            post_time=post_time
+        )
+    except Exception as e:
+        print(f"发布笔记时发生错误: {str(e)}")
+        traceback.print_exc()  # 输出完整的错误堆栈跟踪 
+        raise  # 抛出异常以便上层捕获
 
 if __name__=="__main__":
 

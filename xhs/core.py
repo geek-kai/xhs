@@ -777,12 +777,16 @@ class XhsClient:
                     "partNumber": part_num,
                     "uploadId": upload_id
                 }
-                res = self.request("PUT", url, params=params, data=data, headers=headers)
+                logging.info(f"开始上传第 {part_num} 部分")
+
+                res = self.request("PUT", url, params=params, data=data, headers=headers)  
+                logging.info(f"上传第 {part_num} 部分成功")
                 parts.append({
                     "PartNumber": part_num,
                     "ETag": res.headers["Etag"]
                 })
                 part_num += 1
+        print(f"分段上传完成")
         return self.create_complete_multipart_upload(file_id, token, upload_id, parts)
 
     def upload_file(
@@ -981,6 +985,8 @@ class XhsClient:
         if topics is None:
             topics = []
 
+        logging.info(f"开始上传视频")
+
         file_id, token = self.get_upload_files_permit("video")
         res = self.upload_file(
             file_id,
@@ -988,6 +994,8 @@ class XhsClient:
             video_path,
             content_type="video/mp4",
         )
+        logging.info(f"视频上传成功")
+
         video_id, is_upload = res.headers["X-Ros-Video-Id"], False
 
         image_id = None
