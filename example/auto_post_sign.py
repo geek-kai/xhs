@@ -12,11 +12,12 @@ from tkinter import filedialog
 from threading import Thread  # 导入线程模块
 import json
 from add import add  # 使用绝对导入
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 
 class AutoPoster:
     def __init__(self, video_folder: str, cookie: str, title: str, content: str, threshold: int,
                  cover_folder: str = None, good_id=None, good_name=None, topics=None, proxies=None,
-                 wait_time: int = 1800, log_output=None, first_post_immediate=False, mode=2, log_account_activity=None, log_user=None):
+                 wait_time: int = 1800, log_output=None, first_post_immediate=False, mode=2, log_account_activity=None, log_user=None,count=0):
         self.video_folder = video_folder
         self.cover_folder = cover_folder
         self.cookie = cookie
@@ -32,10 +33,10 @@ class AutoPoster:
         self.first_post_immediate = first_post_immediate
         self.mode = mode
         self.log_account_activity = log_account_activity  # 记录账号活动日志的函数
-        self.log_user = log_user  # 记录用户名
+        self.log_user = log_user 
+        self.count = count  # 记录发布次数
 
         # 初始化日志
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
         # 获取所有视频和封面文件
         self.video_files = self._get_files(video_folder, ['.mp4', '.MP4'])
@@ -80,9 +81,9 @@ class AutoPoster:
     def log_message(self, message: str):
         """在日志输出框中显示信息并记录到账号日志"""
         logging.info(message)
-        if self.log_output:
-            self.log_output.insert(tk.END, message + "\n")
-            self.log_output.see(tk.END)  # 滚动到文本框的底部
+        # if self.log_output:
+        #     self.log_output.insert(tk.END, message + "\n")
+        #     self.log_output.see(tk.END)  # 滚动到文本框的底部
 
         # 记录到账号日志
         if self.log_account_activity:
@@ -115,138 +116,49 @@ class AutoPoster:
         return new_video_path
     def start_posting(self):
         """开始自动发布流程"""
-        post_count = 0
-        if self.mode == 1:  # 现有模式
-            while post_count < self.threshold:
-                try:
-                    video_path, cover_path = self._get_next_files()
-
-                    # 发布笔记
-                    self.log_message(f"正在发布视频: {video_path}")
-                    self.log_message(f"使用封面: {cover_path if cover_path else '无封面'}")
-
-                    # 确保 cover_path 有值
-                    cover = cover_path if cover_path else None
-
-                    # 添加重试机制
-                    retries = 0
-                    while retries < 3:
-                        try:
-                            add(
-                                good_id=self.good_id,
-                                good_name=self.good_name,
-                                cookie=self.cookie,
-                                proxies=self.proxies,
-                                title=self.title,
-                                content=self.content,
-                                topics=self.topics,
-                                cover_path=cover,
-                                video_path=video_path
-                            )
-                            self.log_message("发布成功！")
-                            self.update_video_filename(video_path=video_path)
-                            post_count += 1
-                            break  # 成功后退出重试循环
-                        except Exception as e:
-                            if "签名服务器返回错误状态码" in str(e):
-                                retries += 1
-                                self.log_message(f"发布笔记时发生错误: {str(e)}，正在重试... (尝试次数: {retries})")
-                                time.sleep(10)  # 等待10秒后重试
-                            else:
-                                raise  # 其他错误直接抛出
-                    if(post_count>=self.threshold):break
-                    # 随机等待时间：30分钟 + (0-10分钟的随机值)
-                    next_time = self.wait_time + random.randint(0, 600)
-                    next_post_time = datetime.now().timestamp() + next_time
-                    self.log_message(f"下次发布时间: {datetime.fromtimestamp(next_post_time).strftime('%Y-%m-%d %H:%M:%S')}")
-                    time.sleep(next_time)
-                except KeyboardInterrupt:
-                    self.log_message("发布过程被用户中断。")
-                    break  # 退出循环
-                except Exception as e:
-                    self.log_message(f"发布失败: {str(e)} 跳过！！")
-                    post_count += 1 
-                    if(post_count>=self.threshold):break
-                      # 随机等待时间：30分钟 + (0-10分钟的随机值)
-                    next_time = self.wait_time + random.randint(0, 600)
-                    next_post_time = datetime.now().timestamp() + next_time
-                    self.log_message(f"下次发布时间: {datetime.fromtimestamp(next_post_time).strftime('%Y-%m-%d %H:%M:%S')}")
-                    time.sleep(next_time)
-        elif self.mode == 2:  # 定时发布模式
-            while post_count < self.threshold:
-                try:
-                    video_path, cover_path = self._get_next_files()
-                    post_time = None
-
-                    # 计算 post_time
-                    if post_count == 0 and not self.first_post_immediate:
-                        post_time = (datetime.now() + timedelta(seconds=self.wait_time + random.randint(0, 600)))
-                    elif post_count > 0:
-                        if self.first_post_immediate:
-                            time_num = post_count
-                        else:
-                            time_num = post_count + 1
-                        post_time = (datetime.now() + timedelta(seconds=(time_num) * self.wait_time + random.randint(0, 600)))
-
-                    # 检查 post_time 是否为 None
-                    if post_time:
-                        if post_time < datetime.now() + timedelta(hours=1, minutes=5):
-                            self.log_message(f"第{post_count + 1}条，postTime{post_time.strftime('%Y-%m-%d %H:%M:%S')}定时时间小于当前时间 + 1 小时 + 5 分钟，有风控风险，postTime系统调整为当前时间 + 1 小时 + 10-15分钟随机值")
-                            random_minutes = random.randint(10, 15)
-                            post_time = datetime.now() + timedelta(hours=1, minutes=random_minutes)
-
-                        self.log_message(f"第{post_count + 1}条，定时发布时间{post_time.strftime('%Y-%m-%d %H:%M:%S')}")
-                    else:
-                        self.log_message(f"第{post_count + 1}条，立即发布")
-
-                    # 添加重试机制
-                    retries = 0
-                    while retries < 3:
-                        try:
-                            self.log_message(f"发布笔记参数: title={self.title}, "
-                                            f"good_id={self.good_id}, "
-                                            f"cookie={self.cookie}, "
-                                            f"proxies={self.proxies}, "
-                                            f"title={self.title}, "
-                                            f"content={self.content}, "
-                                            f"topics={self.topics}, "
-                                            f"cover_path={cover_path}, "
-                                            f"video_path={video_path}, "
-                                            f"post_time={post_time.strftime('%Y-%m-%d %H:%M:%S') if post_time else None}")
-
-                            add(
-                                good_id=self.good_id,
-                                good_name=self.good_name,
-                                cookie=self.cookie,
-                                proxies=self.proxies,
-                                title=self.title,
-                                content=self.content,
-                                topics=self.topics,
-                                cover_path=cover_path,
-                                video_path=video_path,
-                                post_time=post_time.strftime('%Y-%m-%d %H:%M:%S') if post_time else None
-                            )
-                            self.update_video_filename(video_path=video_path)
-                            break  # 成功后退出重试循环
-                        except Exception as e:
-                            retries += 1
-                            self.log_message(f"发布笔记时发生错误: {str(e)}，正在重试... (尝试次数: {retries})")
-                            time.sleep(10)  # 等待10秒后重试
-                    self.log_message("发布成功！")
-                    post_count += 1
-                    self.log_message(f"等待15秒后发布下一条...")
-                    time.sleep(15)  # 每条发布后等待15秒
-                except KeyboardInterrupt:
-                    self.log_message("发布过程被用户中断。")
-                    break  # 退出循环
-                except Exception as e:
-                    self.log_message(f"发布失败: {str(e)}")
-                    post_count += 1
-                    self.log_message(f"等待15秒后发布下一条...")
-                    time.sleep(15)  # 每条发布后等待15秒
+        video_path, cover_path = self._get_next_files()
+        self.log_message(f"正在发布视频: {video_path}")
+        self.log_message(f"使用封面: {cover_path if cover_path else '无封面'}")
         
-        else:
-            self.log_message("无效的发布模式选择！")
+        cover = cover_path if cover_path else None
+        retries = 0
+        
+        def do_post():
+            return 
+        
+        try:
+            while retries < 3:
+                try:
+                    add(
+                    good_id=self.good_id,
+                    good_name=self.good_name,
+                    cookie=self.cookie,
+                    proxies=self.proxies,
+                    title=self.title,
+                    content=self.content,
+                    topics=self.topics,
+                    cover_path=cover,
+                    video_path=video_path
+                    )
+                    self.log_message("发布成功！")
+                    self.update_video_filename(video_path=video_path)
+                    self.count += 1
+                    break
+                    
+                except TimeoutError:
+                    self.log_message(f"发布操作超时，条数：{self.count+1}，正在重试... (尝试次数: {retries + 1})")
+                    retries += 1
+                    time.sleep(10)
+                except Exception as e:
+                    retries += 1
+                    self.log_message(f"发布笔记时发生错误: {str(e)}，条数：{self.count+1}，正在重试... (尝试次数: {retries})")
+                    time.sleep(10)
+                    
+        except KeyboardInterrupt:
+            self.log_message("发布过程被用户中断。")
+        except Exception as e:
+            self.log_message(f"发布失败: {str(e)}，条数：{self.count+1}")
+            self.count += 1
 
 def start_auto_posting():
     def submit():
