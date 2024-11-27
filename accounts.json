@@ -6,7 +6,7 @@
         "video_folder": "E:/小红书连怼/测试4/视频",
         "title": "123",
         "content": "123",
-        "threshold": 10,
+        "threshold": 1,
         "wait_time": 120,
         "cover_folder": "E:/小红书连怼/测试4/封面",
         "first_post_immediate": "n"

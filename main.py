@@ -2,7 +2,7 @@ import os
 import json
 import tkinter as tk
 from tkinter import scrolledtext, filedialog, messagebox, simpledialog
-from auto_post_sign import AutoPoster  # 导入 AutoPoster 类
+from example.auto_post_sign import AutoPoster  # 导入 AutoPoster 类
 import threading  # 导入 threading 模块
 import time
 from datetime import datetime, timedelta

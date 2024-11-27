@@ -11,7 +11,7 @@ from tkinter import messagebox, scrolledtext
 from tkinter import filedialog
 from threading import Thread  # 导入线程模块
 import json
-from add import add  # 使用绝对导入
+from .add import add  # 使用绝对导入
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 
 class AutoPoster:
