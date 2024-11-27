@@ -325,8 +325,7 @@ class AccountManagerApp:
                     # 检查发布计数
                     if poster.count < account_info['threshold']:
                         # 计算下一次发布的时间并更新 account_info
-                        # next_post_time = datetime.now() + timedelta(seconds=account_info['wait_time']) + timedelta(minutes=random.randint(1, 10))
-                        next_post_time = datetime.now() + timedelta(seconds=account_info['wait_time']) 
+                        next_post_time = datetime.now() + timedelta(seconds=account_info['wait_time']) + timedelta(minutes=random.randint(1, 10))
 
                         account_info['next_post_time'] = next_post_time
                         self.log_account_activity(account_info['username'], f"账号 {account_info['username']} 第{poster.count} 条计算下一次发布时间：{next_post_time}，下一条文件索引{poster.current_video_index}\n")
@@ -376,7 +375,7 @@ class AccountManagerApp:
 
     def run_posting_with_timeout(self, poster, timeout_event):
         try:
-            # poster.start_posting()
+            poster.start_posting()
             timeout_event.set()  # 如果成功完成，设置事件
         except Exception as e:
             self.log_account_activity(poster.log_user, f"发布失败: {str(e)}")
