@@ -1,8 +1,8 @@
 import requests
 
 proxies = {
-    "http": "socks5://uEU17768qt:mzFGHKLV@121.224.7.202:8864",
-    "https": "socks5://uEU17768qt:mzFGHKLV@121.224.7.202:8864"
+    "http": "socks5://blH66715R7:knpsVYZ6@125.124.6.52:8863",
+    "https": "socks5://blH66715R7:knpsVYZ6@125.124.6.52:8863"
 }
 
 try:
