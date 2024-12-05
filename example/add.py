@@ -120,7 +120,7 @@ def add(
     else:
         cover = None  # 确保 cover 变量在 cover_path 为空时有默认值
 
-    # print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover},cookie={cookie},proxies={proxies}")
+    # print(f"发布笔记参数: title={title}, video_path={media_path}, desc={content}, cover_path={cover},cookie={cookie},proxies={proxies}，good_id={good_id}")
 
     try:
         client.create_video_note(

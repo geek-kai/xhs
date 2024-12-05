@@ -25,6 +25,7 @@ class AccountManagerApp:
     def __init__(self, master):
         self.master = master
         self.master.title("小红书自动发布")
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)  # 添加窗口关闭事件处理
 
         self.json_file_path = os.path.join(os.getcwd(), "accounts.json")  # 使用当前工作目录
         self.accounts = []  # 用于存储账号信息
@@ -69,22 +70,22 @@ class AccountManagerApp:
         self.threshold_entry = tk.Entry(self.master)
         self.threshold_entry.grid(row=4, column=2)
 
-        tk.Label(self.master, text="Cookie:").grid(row=5, column=1)
+        # 新增商品ID输入框
+        tk.Label(self.master, text="商品ID:").grid(row=5, column=1)
+        self.product_id_entry = tk.Entry(self.master)
+        self.product_id_entry.grid(row=5, column=2)
+
+        tk.Label(self.master, text="Cookie:").grid(row=6, column=1)
         self.cookie_entry = tk.Entry(self.master, state='readonly')  # 设置为只读
-        self.cookie_entry.grid(row=5, column=2)
+        self.cookie_entry.grid(row=6, column=2)
 
-        tk.Label(self.master, text="代理（可选）:").grid(row=6, column=1)
+        tk.Label(self.master, text="代理（可选）:").grid(row=7, column=1)
         self.proxy_entry = tk.Entry(self.master, state='readonly')  # 设置为只读
-        self.proxy_entry.grid(row=6, column=2)
+        self.proxy_entry.grid(row=7, column=2)
 
-        tk.Label(self.master, text="等待时间（秒，默认为3600秒）:").grid(row=7, column=1)
+        tk.Label(self.master, text="等待时间（秒，默认为3600秒）:").grid(row=8, column=1)
         self.wait_time_entry = tk.Entry(self.master)
-        self.wait_time_entry.grid(row=7, column=2)
-
-        tk.Label(self.master, text="第一条是否立即发布:").grid(row=8, column=1)
-        self.first_post_immediate_var = tk.StringVar(value='n')
-        tk.Radiobutton(self.master, text="是", variable=self.first_post_immediate_var, value='y').grid(row=8, column=2, sticky="w")
-        tk.Radiobutton(self.master, text="否", variable=self.first_post_immediate_var, value='n').grid(row=8, column=2, sticky="e")
+        self.wait_time_entry.grid(row=8, column=2)
 
         # 日志输出框
         self.log_output = scrolledtext.ScrolledText(self.master, width=60, height=15)
@@ -110,6 +111,10 @@ class AccountManagerApp:
         
         # 新增更改代理按钮
         tk.Button(self.master, text="更改代理", command=self.change_proxy).grid(row=12, column=1)
+
+
+        # 禁用发布按钮，直到信息被保存
+        # self.submit_button.config(state=tk.DISABLED)
 
         self.create_thread_widgets()  # 创建线程管理的UI组件
 
@@ -179,6 +184,8 @@ class AccountManagerApp:
             self.title_entry.insert(0, self.selected_account.get("title", ""))
             self.content_entry.delete(0, tk.END)
             self.content_entry.insert(0, self.selected_account.get("content", ""))
+            self.product_id_entry.delete(0, tk.END)
+            self.product_id_entry.insert(0, self.selected_account.get("product_id", ""))
             self.threshold_entry.delete(0, tk.END)
             self.threshold_entry.insert(0, self.selected_account.get("threshold", "10"))  # 默认阈值为10
             self.cookie_entry.config(state='normal')  # 设置为可编辑
@@ -193,9 +200,6 @@ class AccountManagerApp:
             self.cover_folder_entry.insert(0, self.selected_account.get("cover_folder", ""))
             self.wait_time_entry.delete(0, tk.END)
             self.wait_time_entry.insert(0, self.selected_account.get("wait_time", "3600"))
-
-            # 回显 first_post_immediate
-            self.first_post_immediate_var.set(self.selected_account.get("first_post_immediate", 'n'))  # 默认值为 'n'
 
     def select_video_folder(self):
         folder_selected = filedialog.askdirectory()
@@ -237,9 +241,9 @@ class AccountManagerApp:
                 "cookie": self.accounts[index].get("cookie", ""),
                 "proxy": self.accounts[index].get("proxy", ""),
                 "wait_time": int(self.accounts[index].get("wait_time", 3600)),
-                "first_post_immediate": self.accounts[index].get("first_post_immediate", 'y'),
                 "video_folder": self.accounts[index].get("video_folder", ""),
                 "cover_folder": self.accounts[index].get("cover_folder", ""),
+                "product_id": self.accounts[index].get("product_id", "")
             }
             accounts_info.append(account_info)
 
@@ -302,16 +306,16 @@ class AccountManagerApp:
                             proxies=account_info["proxy"],
                             wait_time=account_info["wait_time"],
                             log_output=self.log_output,
-                            first_post_immediate=account_info["first_post_immediate"] == 'y',
                             mode=2,
                             log_account_activity=self.log_account_activity,
-                            log_user=account_info['username']
+                            log_user=account_info['username'],
+                            good_id=account_info['product_id']
                         )
                     
                     # 开始发布
                     poster = account_info['poster']
                          # 日志输出账号开始发布
-                    self.log_account_activity(account_info['username'], f"账号 {account_info['username']} 开始发布:第{poster.count}条")
+                    self.log_account_activity(account_info['username'], f"账号 {account_info['username']} 开始发布:第{poster.count+1}条")
 
                     timeout_event = threading.Event()
                     posting_thread = threading.Thread(target=self.run_posting_with_timeout, args=(poster, timeout_event))
@@ -359,7 +363,7 @@ class AccountManagerApp:
                         wait_minutes = wait_seconds / 60  # 将秒转换为分钟
                         self.log_account_activity(account_info['username'], f"账号 {account_info['username']} 第{wait_minutes:.2f} 分钟后进行全局检测\n")                    
                         
-                    time.sleep(max(0, wait_seconds))
+                    stop_event.wait(timeout=max(0, wait_seconds))
                 else:
                     break
 
@@ -422,6 +426,7 @@ class AccountManagerApp:
         self.video_folder_entry.delete(0, tk.END)
         self.title_entry.delete(0, tk.END)
         self.content_entry.delete(0, tk.END)
+        self.product_id_entry.delete(0, tk.END)
         self.threshold_entry.delete(0, tk.END)
         self.cookie_entry.delete(0, tk.END)  # 清空 Cookie
         self.proxy_entry.delete(0, tk.END)  # 清空 代理
@@ -468,9 +473,8 @@ class AccountManagerApp:
             self.selected_account["wait_time"] = int(self.wait_time_entry.get() or 3600)
             self.selected_account["cover_folder"] = self.cover_folder_entry.get()
             self.selected_account["video_folder"] = self.video_folder_entry.get()  # 保存视频文件夹路径
-            
-            # 保存每个账号的 first_post_immediate 值
-            self.selected_account["first_post_immediate"] = self.first_post_immediate_var.get()
+            self.selected_account["product_id"] = self.product_id_entry.get()  # 保存产品ID
+         
 
             self.save_accounts()  # 保存更新后的账号信息
             messagebox.showinfo("成功", "账号内容已保存！")
@@ -525,6 +529,26 @@ class AccountManagerApp:
             thread_id_str, _ = selected_item.split(": ", 1)
             thread_id = int(thread_id_str)
             self.prompt_terminate_account(thread_id)  # 调用提示输入账号名称的方法
+
+    def on_closing(self):
+        """处理窗口关闭事件"""
+        # 设置所有线程的终止事件
+        for thread_id in self.thread_events:
+            self.thread_events[thread_id].set()  # 设置事件，唤醒线程
+            # self.thread_events[thread_id].join()
+            logging.info(f"即将关闭进程，线程 {thread_id} 已经被终止。")
+        
+        while self.threads:
+            time.sleep(0.1)  # 避免过于频繁的检查
+        # 等待所有线程结束
+        # for thread_info in self.threads.values():
+        #     if thread_info["thread"].is_alive():
+        #         thread_info["thread"].join(timeout=5)  # 设置一个超时时间，避免无限等待
+        logging.info(f"即将关闭窗口。")
+        # 关闭窗口
+        self.master.destroy()
+
+    
 
 if __name__ == "__main__":
     root = tk.Tk()

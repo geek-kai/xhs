@@ -164,5 +164,65 @@
         "wait_time": 3600,
         "cover_folder": "D:/小红书/账号/阿周商贸/封面",
         "first_post_immediate": "y"
+    },
+    {
+        "username": "一只小梨涡-正式",
+        "cookie": "a1=191839da8f0dtki4eall66a8eey5iyxvlyn7e1f2m50000261574; webId=468876778cdbe565016f3d1a7696f17f; gid=yjyYqjfDqy1yyjyYqjf0Yvyii8f9T34d011KIJ6K0YddvW2823vChd888JKy2W48yd4Yyqjy; customerClientId=336041950147271; abRequestId=468876778cdbe565016f3d1a7696f17f; web_session=040069b710493b4e325b250071354bdd76e425; x-user-id-creator.xiaohongshu.com=66640a73000000000700620d; customer-sso-sid=68c5174411520014402029929cfe17be03042f2a; access-token-creator.xiaohongshu.com=customer.creator.AT-68c5174411520014402029932lnyvbx2ewdz5opn; galaxy_creator_session_id=aZ3I9Tis6rQB508Ev4LgSImTJMADmKqixLWt; galaxy.creator.beaker.session.id=1732528210472043640409; acw_tc=0ad5877917325847401612305e781ea3a729dfb5c024bb0a0d099810e73c7e; webBuild=4.44.1; xsecappid=xhs-pc-web; websectiga=29098a4cf41f76ee3f8db19051aaa60c0fc7c5e305572fec762da32d457d76ae; sec_poison_id=00f7bfa4-4dfc-4217-a730-1fc6a02ad17f; unread={%22ub%22:%226741d09d000000000201af7e%22%2C%22ue%22:%2267288ec9000000001a01d95d%22%2C%22uc%22:27}",
+        "proxy": {
+            "http": "http://fI128621f2:cenqvFZ0@182.43.137.236:8894",
+            "https": "http://fI128621f2:cenqvFZ0@182.43.137.236:8894"
+        },
+        "video_folder": "D:/小红书/账号/一只小窝里/视频",
+        "title": "这个小妙招很有用！测",
+        "content": "这个小妙招很有用！测",
+        "threshold": 6,
+        "wait_time": 2569,
+        "cover_folder": "D:/小红书/账号/一只小窝里/封面",
+        "first_post_immediate": "y"
+    },
+    {
+        "username": "猫么么-正式",
+        "cookie": "a1=18f809dc2b3jiytljrup7akbd6t6mhvemiovmi7bc00000921294; webId=cae7b630a3e8e2843d00709dbee6157c; gid=yYiY8jfS2j6DyYiY8jfSJ33WDqV3v91VF7UWlDS0TDfK9h88K6xhd6888jJyJj48qyffW2WW; customerClientId=067735372385678; x-user-id-pro.xiaohongshu.com=5fa954f8000000000100b407; abRequestId=cae7b630a3e8e2843d00709dbee6157c; x-user-id-redlive.xiaohongshu.com=662f38610000000007005365; x-user-id-zhaoshang.xiaohongshu.com=6472c13d0000000010034a47; timestamp2=172440015968254cd2e2488021d8e08b2039c97c78a0f6fa73fb1c2a45cb1a0; timestamp2.sig=lAVvhfItnkfLz6OjfriZjZWacF_fxW5lTLQnuLSqTlY; x-user-id-ark.xiaohongshu.com=6663217500000000030322c0; x-user-id-fuwu.xiaohongshu.com=6663217500000000030322c0; web_session=040069b7bafddc256079490071354b420b2283; customer-sso-sid=68c5174411518210515757037b1bd0535c766a0d; x-user-id-creator.xiaohongshu.com=66cebe94000000001d03302f; access-token-creator.xiaohongshu.com=customer.creator.AT-68c517441151821051575704rhnajg9ruhicdw5q; galaxy_creator_session_id=W72gAFkOANPzC599uj3IjIwC5s1r5oP102qU; galaxy.creator.beaker.session.id=1732528168827006452686; acw_tc=0a00d5bf17325990941121032ef492277a9dc9176ff488a10f1a6ad3d1d27e; webBuild=4.44.1; xsecappid=xhs-pc-web; websectiga=2845367ec3848418062e761c09db7caf0e8b79d132ccdd1a4f8e64a11d0cac0d; sec_poison_id=fab34c42-bfce-4bef-9ca2-19c326bf0ed6; unread={%22ub%22:%2267371a8f000000003c01f050%22%2C%22ue%22:%22673b4bff000000000202956e%22%2C%22uc%22:24}\n",
+        "proxy": {
+            "http": "http://fI128621f2:cenqvFZ0@182.43.137.236:8894",
+            "https": "http://fI128621f2:cenqvFZ0@182.43.137.236:8894"
+        },
+        "video_folder": "D:/小红书/账号/猫meme/视频",
+        "title": "这六种食物不要再吃了！测",
+        "content": "这六种食物不要再吃了！测",
+        "threshold": 6,
+        "wait_time": 3600,
+        "cover_folder": "D:/小红书/账号/猫meme/封面",
+        "first_post_immediate": "y"
+    },
+    {
+        "username": "桂花糕-正式",
+        "cookie": "a1=190beb5ebeazbt8irj5ylcxo51t1t6lyfzyo6p34100000398006; webId=ee289df9bc4598d481307e5184b05e9d; gid=yj8DdD2iKfi2yj8DdD2dDuUqd0uD9Y3FV2v1v4ySCl2y9l88y9K1vK888qjY88K8DdY8KKDd; x-user-id-ark.xiaohongshu.com=668d51df0000000003033253; customerClientId=121975318288144; x-user-id-fuwu.xiaohongshu.com=669738dfe300000000000001; timestamp2=17224116172994c260098f3ca0f83c3a9d39b3782753bf11cb43c0dfb1f6c57; timestamp2.sig=CIreF3jWPgPJIXM3UKorkempNCd6voN6hi2aS-KvOzE; abRequestId=ee289df9bc4598d481307e5184b05e9d; web_session=040069b782009d2563d1840f71354bb921ca1e; x-user-id-creator.xiaohongshu.com=66f643d5000000001d033387; customer-sso-sid=68c517441151606309070441a26d5540a45acbdd; access-token-creator.xiaohongshu.com=customer.creator.AT-68c517441151606309070443ntn3qixm0mi5oki4; galaxy_creator_session_id=sULfqoTsxu3fVyu9siIqsIaVPgaATj68nYI3; galaxy.creator.beaker.session.id=1732528118795091365433; xsecappid=xhs-pc-web; acw_tc=0a00dd9117325992378897520e9f7068c892689a77300e96f1298e2dd28dfa; webBuild=4.44.1; websectiga=cffd9dcea65962b05ab048ac76962acee933d26157113bb213105a116241fa6c; sec_poison_id=387d68a4-cdc5-4c6b-8ddd-f304d3cf0177; unread={%22ub%22:%226743dfcf0000000007037aea%22%2C%22ue%22:%2267449bcc000000000702bd90%22%2C%22uc%22:28}",
+        "proxy": {
+            "http": "http://fI128621f2:cenqvFZ0@182.43.137.236:8894",
+            "https": "http://fI128621f2:cenqvFZ0@182.43.137.236:8894"
+        },
+        "video_folder": "D:/小红书/账号/桂花糕/视频",
+        "title": "这个小妙招快学起来！连",
+        "content": "这个小妙招快学起来！连",
+        "threshold": 20,
+        "wait_time": 2489,
+        "cover_folder": "D:/小红书/账号/桂花糕/封面",
+        "first_post_immediate": "y"
+    },
+    {
+        "username": "储备棉-正式",
+        "cookie": "a1=190c9ff47ffxux8bxewi3z7ygxclpd1v8dwrzv6rk00000624621; webId=8060aca39cb1768b489586dcec1d223c; gid=yj8Sjii4f2YSyj8Sjii4WfhKiiC7CYDCdE3qEFTuWvkCSF881Ufyhu888KJ4KJy8iK2YqiJJ; x-user-id-ark.xiaohongshu.com=6695cc0a000000000f0358b0; customerClientId=091955703060165; x-user-id-fuwu.xiaohongshu.com=6695cc0a000000000f0358b0; timestamp2=1721377288812c2e0a9b1873085f256ab4608bb7e78a093ad00de9d1e329666; timestamp2.sig=QAUWkKMxt-zJ18ExZSOtGrhn--cvfRuekUjH1egxuZQ; abRequestId=8060aca39cb1768b489586dcec1d223c; web_session=040069b7c476542549d9310f71354ba2b95be1; x-user-id-creator.xiaohongshu.com=66b0351c000000001d03198f; customer-sso-sid=68c51744115094058327663952b42ae108c09d47; access-token-creator.xiaohongshu.com=customer.creator.AT-68c517441150940583276642xvulc76e0ijlj5uq; galaxy_creator_session_id=zEjKEYimkd03fHwnWjEUnVXupSfMqq2GsEKw; galaxy.creator.beaker.session.id=1732527963855083703007; acw_tc=0a00d7db17325993585784370ed1c8e2c6018b440f2624e3e9fe530410f8bd; webBuild=4.44.1; xsecappid=xhs-pc-web; websectiga=3fff3a6f9f07284b62c0f2ebf91a3b10193175c06e4f71492b60e056edcdebb2; sec_poison_id=77394ec1-0d43-47d6-b9f1-1bbe46222459; unread={%22ub%22:%2267404f6b0000000002019b03%22%2C%22ue%22:%22672c77a0000000001b0128cc%22%2C%22uc%22:23}\n",
+        "proxy": {
+            "http": "http://fI128621f2:cenqvFZ0@182.43.137.236:8894",
+            "https": "http://fI128621f2:cenqvFZ0@182.43.137.236:8894"
+        },
+        "video_folder": "D:/小红书/账号/储备库发展/视频",
+        "title": "这样包饺子才好吃！！测这样包饺子才好吃！！测",
+        "content": "这样包饺子才好吃！！测这样包饺子才好吃！！测",
+        "threshold": 20,
+        "wait_time": 3600,
+        "cover_folder": "D:/小红书/账号/储备库发展/封面",
+        "first_post_immediate": "y"
     }
 ]
